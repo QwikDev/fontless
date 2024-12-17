@@ -1,25 +1,25 @@
-import type { DocumentHead } from "@qwik.dev/router";
-import { component$ } from "@qwik.dev/core";
+import type { DocumentHead } from '@qwik.dev/router';
+import { component$, useStyles$ } from '@qwik.dev/core';
+import styles from './index.css?inline';
 
 export default component$(() => {
-  return (
-    <>
-      <h1>Hi 👋</h1>
-      <div>
-        Can't wait to see what you build with qwik!
-        <br />
-        Happy coding.
-      </div>
-    </>
-  );
+	useStyles$(styles);
+
+	return (
+		<div>
+			<h1>Google provider</h1>
+			<div>Poppins</div>
+			<p>Press Start 2P</p>
+		</div>
+	);
 });
 
 export const head: DocumentHead = {
-  title: "Welcome to Qwik",
-  meta: [
-    {
-      name: "description",
-      content: "Qwik site description",
-    },
-  ],
+	title: 'Welcome to Qwik',
+	meta: [
+		{
+			name: 'description',
+			content: 'Qwik site description',
+		},
+	],
 };
