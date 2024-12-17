@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"install:deps": "pnpm --filter fontless-demo-* install",
-		"qwik-demo.dev": "pnpm --filter fontless-demo-qwik-app dev"
+		"qwik-demo.dev": "pnpm --filter fontless-demo-qwik-app dev",
+		"react-demo.dev": "pnpm --filter fontless-demo-react-app dev"
 	},
 	"keywords": [],
 	"author": "",
