@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"install:deps": "pnpm --filter fontless-demo-* install",
+		"qwik-demo.dev": "pnpm --filter fontless-demo-qwik-app dev"
 	},
 	"keywords": [],
 	"author": "",
