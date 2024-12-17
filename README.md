@@ -1,3 +1,3 @@
 # fonts
 
-Add automatic font optimization to your Qwik project.
+Add automatic font optimization any framework.
