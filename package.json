@@ -7,7 +7,8 @@
 		"install:deps": "pnpm --filter fontless-demo-* install",
 		"qwik-demo.dev": "pnpm --filter fontless-demo-qwik-app dev",
 		"react-demo.dev": "pnpm --filter fontless-demo-react-app dev",
-		"vue-demo.dev": "pnpm --filter fontless-demo-vue-app dev"
+		"vue-demo.dev": "pnpm --filter fontless-demo-vue-app dev",
+		"demo.dev": "pnpm --filter fontless-demo-* dev"
 	},
 	"keywords": [],
 	"author": "",
