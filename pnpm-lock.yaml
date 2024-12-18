@@ -20,6 +20,9 @@ importers:
       magic-string:
         specifier: ^0.30.17
         version: 0.30.17
+      ohash:
+        specifier: ^1.1.4
+        version: 1.1.4
       pathe:
         specifier: ^1.1.2
         version: 1.1.2
@@ -71,6 +74,8 @@ importers:
       vite-tsconfig-paths:
         specifier: ^4.2.1
         version: 4.3.2(typescript@5.4.5)(vite@5.4.10(@types/node@20.14.11))
+
+  demo/qwik-app/server: {}
 
   demo/react-app:
     dependencies:
