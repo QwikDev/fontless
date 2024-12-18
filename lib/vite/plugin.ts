@@ -18,14 +18,14 @@ export interface FontFaceResolution {
 // FontFamilyInjectionPluginOptions in nuxt fonts
 interface FontlessOptions {
 	resolveFontFace: (fontFamily: string, fallbackOptions?: { fallbacks: string[], generic?: GenericCSSFamily }) => Awaitable<undefined | FontFaceResolution>
-	dev: boolean
 	processCSSVariables?: boolean
 	shouldPreload: (fontFamily: string, font: FontFaceData) => boolean
 	fontsToPreload: Map<string, Set<string>>
   }
 
 export function fontless(options: FontlessOptions): Plugin {
-	let postcssOptions: Parameters<typeof transform>[1] | undefined
+	let postcssOptions: Parameters<typeof transform>[1] | undefined;
+	let isDev: boolean;
 	async function transformCSS(code: string, id: string, opts: { relative?: boolean } = {}) {
 		const s = new MagicString(code)
 
@@ -66,7 +66,7 @@ export function fontless(options: FontlessOptions): Plugin {
 			  for (let declaration of declarations) {
 				if (!injectedDeclarations.has(declaration)) {
 				  injectedDeclarations.add(declaration)
-				  if (!options.dev) {
+				  if (!isDev) {
 					declaration = await transform(declaration, {
 					  loader: 'css',
 					  charset: 'utf8',
@@ -156,7 +156,9 @@ export function fontless(options: FontlessOptions): Plugin {
 
 		configResolved(config) {
 			console.log("LOG: fontless - configResolved");
-			if (options.dev || !config.esbuild || postcssOptions) {
+			isDev = config.command === "serve";
+			console.log('isDev: ', isDev);
+			if (isDev || !config.esbuild || postcssOptions) {
 			  return
 			}
 	
