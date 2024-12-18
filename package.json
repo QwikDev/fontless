@@ -15,6 +15,9 @@
 	"license": "ISC",
 	"devDependencies": {
 		"css-tree": "^3.1.0",
+		"fontaine": "^0.5.0",
+		"pathe": "^1.1.2",
+		"ufo": "^1.5.4",
 		"unifont": "^0.1.6",
 		"vite": "^6.0.3"
 	}
