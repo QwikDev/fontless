@@ -1,6 +1,7 @@
 import type { Plugin } from "vite";
 import { createUnifont, providers } from "unifont";
-import { parse, walk } from "css-tree";
+import { parse, walk, type CssNode } from "css-tree";
+import { extractFontFamilies } from "../css/parse";
 
 export function fontless(): Plugin {
 	return {
@@ -15,6 +16,19 @@ export function fontless(): Plugin {
 			if (!id.includes(".css")) return;
 
 			const ast = parse(code, { positions: true });
+
+			function processNode(node: CssNode) {
+				walk(node, {
+					visit: 'Declaration',
+					enter(node) {
+						if (this.atrule?.name === 'font-family' && node.property === 'font-family') {
+							for (const family of extractFontFamilies(node)) {
+								console.log("family: ", family);
+							}
+						}
+					}
+				})
+			}
 
 			console.log("ast: ", ast);
 		},
