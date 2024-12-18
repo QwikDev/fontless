@@ -146,6 +146,8 @@ export function fontless(options: FontlessOptions): Plugin {
 		processNode(ast);
 
 		await Promise.all(promises)
+
+		return s;
 	}
 
 
@@ -154,38 +156,37 @@ export function fontless(options: FontlessOptions): Plugin {
 
 		configResolved(config) {
 			console.log("LOG: fontless - configResolved");
-		// 	if (options.dev || !config.esbuild || postcssOptions) {
-		// 	  return
-		// 	}
+			if (options.dev || !config.esbuild || postcssOptions) {
+			  return
+			}
 	
-		// 	postcssOptions = {
-		// 	  target: config.esbuild.target,
-		// 	  ...resolveMinifyCssEsbuildOptions(config.esbuild),
-		// 	}
-		//   },
-		//   renderChunk(code, chunk) {
-		// 	if (chunk.facadeModuleId) {
-		// 	  for (const file of chunk.moduleIds) {
-		// 		if (options.fontsToPreload.has(file)) {
-		// 		  options.fontsToPreload.set(chunk.facadeModuleId, options.fontsToPreload.get(file)!)
-		// 		}
-		// 	  }
-		// 	}
+			postcssOptions = {
+			  target: config.esbuild.target,
+			  ...resolveMinifyCssEsbuildOptions(config.esbuild),
+			}
 		  },
-		//   generateBundle: {
-		// 	enforce: 'post',
-		// 	async handler(_outputOptions, bundle) {
-		// 	  for (const key in bundle) {
-		// 		const chunk = bundle[key]!
-		// 		if (chunk?.type === 'asset' && isCSS(chunk.fileName)) {
-		// 		  const s = await transformCSS(chunk.source.toString(), key, { relative: true })
-		// 		  if (s.hasChanged()) {
-		// 			chunk.source = s.toString()
-		// 		  }
-		// 		}
-		// 	  }
-		// 	},
-		//   },
+		  renderChunk(code, chunk) {
+			if (chunk.facadeModuleId) {
+			  for (const file of chunk.moduleIds) {
+				if (options.fontsToPreload.has(file)) {
+				  options.fontsToPreload.set(chunk.facadeModuleId, options.fontsToPreload.get(file)!)
+				}
+			  }
+			}
+		  },
+		  generateBundle: {
+			async handler(_outputOptions, bundle) {
+			  for (const key in bundle) {
+				const chunk = bundle[key]!
+				if (chunk?.type === 'asset' && isCSS(chunk.fileName)) {
+				  const s = await transformCSS(chunk.source.toString(), key, { relative: true, })
+				  if (s.hasChanged()) {
+					chunk.source = s.toString()
+				  }
+				}
+			  }
+			},
+		  },
 	};
 }
 
