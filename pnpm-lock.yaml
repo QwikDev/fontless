@@ -11,9 +11,15 @@ importers:
       css-tree:
         specifier: ^3.1.0
         version: 3.1.0
+      esbuild:
+        specifier: ^0.24.0
+        version: 0.24.0
       fontaine:
         specifier: ^0.5.0
         version: 0.5.0
+      magic-string:
+        specifier: ^0.30.17
+        version: 0.30.17
       pathe:
         specifier: ^1.1.2
         version: 1.1.2
