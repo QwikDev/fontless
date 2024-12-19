@@ -93,8 +93,8 @@ async function defaultResolveFontFace(
   function normalizeFontData(
     faces: RawFontFaceData | FontFaceData[]
   ): FontFaceData[] {
-    const assetsBaseURL = module.assets.prefix || "/fonts";
-    const renderedFontURLs = new Map<string, string>();
+    // const assetsBaseURL = module.assets.prefix || "/fonts"; //TODO: Review this if it's necessary?
+    // const renderedFontURLs = new Map<string, string>(); //TODO: Review this if it's necessary?
     const data: FontFaceData[] = [];
     for (const face of Array.isArray(faces) ? faces : [faces]) {
       data.push({
@@ -109,7 +109,7 @@ async function defaultResolveFontFace(
             "url" in source &&
             hasProtocol(source.url, { acceptRelative: true })
           ) {
-            source.url = source.url.replace(/^\/\//, "https://");
+            // source.url =  source.url.replace(/^\/\//, "https://"); //TODO: Review this if it's necessary?
             const file = [
               // TODO: investigate why negative ignore pattern below is being ignored
               filename(source.url.replace(/\?.*/, "")).replace(/^-+/, ""),
@@ -119,9 +119,9 @@ async function defaultResolveFontFace(
               .filter(Boolean)
               .join("-");
 
-            renderedFontURLs.set(file, source.url);
+            // renderedFontURLs.set(file, source.url); //TODO: Review this if it's necessary?
             source.originalURL = source.url;
-            source.url = joinURL(assetsBaseURL, file);
+            // source.url = joinURL(assetsBaseURL, file); //TODO: Review this if it's necessary?
           }
           return source;
         }),
@@ -201,6 +201,7 @@ async function defaultResolveFontFace(
           return;
         }
         const fontsWithLocalFallbacks = addFallbacks(fontFamily, fonts);
+
         return {
           fallbacks: result.fallbacks || defaults.fallbacks,
           fonts: fontsWithLocalFallbacks,

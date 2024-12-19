@@ -5,7 +5,6 @@ import type { TransformOptions } from "esbuild";
 import { transformCSS } from "../css/transformer";
 import { providers } from "unifont";
 
-
 const defaultModule = {
   devtools: true,
   experimental: {
