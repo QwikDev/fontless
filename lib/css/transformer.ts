@@ -6,6 +6,7 @@ import { hasProtocol, joinURL, withLeadingSlash } from "ufo";
 import {
   createUnifont,
   FontFaceData,
+  Provider,
   providers,
   RemoteFontSource,
 } from "unifont";
@@ -184,7 +185,31 @@ async function defaultResolveFontFace(
       }
     }
 
-    const unifont = await createUnifont([providers.google()]);
+    const prioritisedProviders = new Set<string>();
+    const resolvedProviders: Array<Provider> = [];
+    for (const [key, provider] of Object.entries(providers)) {
+      if (
+        module.providers?.[key] === false ||
+        (module.provider && module.provider !== key)
+      ) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete providers[key];
+      } else {
+        //TODO: Fix this type
+        const providerOptions: any =
+          module[key as "google" | "local" | "adobe"] ?? {};
+        resolvedProviders.push(provider(providerOptions));
+      }
+    }
+
+    for (const val of module.priority || []) {
+      if (val in providers) prioritisedProviders.add(val);
+    }
+    for (const provider in providers) {
+      prioritisedProviders.add(provider);
+    }
+
+    const unifont = await createUnifont(resolvedProviders);
 
     // Handle explicit provider
     if (override?.provider) {
@@ -209,7 +234,9 @@ async function defaultResolveFontFace(
       }
     }
 
-    const result = await unifont.resolveFont(fontFamily, defaults);
+    const result = await unifont.resolveFont(fontFamily, defaults, [
+      ...prioritisedProviders,
+    ]);
     if (result) {
       // Rewrite font source URLs to be proxied/local URLs
       const fonts = normalizeFontData(result.fonts);

@@ -1,7 +1,35 @@
-div {
-	font: 1.2em "Poppins", sans-serif;
+p {
+  font-size: x-large;
 }
 
-p {
-	font-family: "Press Start 2P", sans-serif;
+.google-poppins {
+  font-family: "Poppins", sans-serif;
+}
+
+.google-press-start {
+  font-family: "Press Start 2P", sans-serif;
+}
+
+.adobe-limon {
+  font-family: "Limon Script Regular", sans-serif;
+}
+
+.adobe-angkor {
+  font-family: "Angkor", sans-serif;
+}
+
+.bunny-aclonica {
+  font-family: "Aclonica", sans-serif;
+}
+
+.bunny-allan {
+  font-family: "Allan", sans-serif;
+}
+
+.font-share-panchang {
+  font-family: "Panchang", sans-serif;
+}
+
+.font-source-luckiest {
+  font-family: "Luckiest Guy", sans-serif;
 }
