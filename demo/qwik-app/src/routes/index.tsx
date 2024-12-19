@@ -7,7 +7,7 @@ export default component$(() => {
 
   return (
     <div>
-      <h1>Google provider</h1>
+      <h1>Google</h1>
       <p class="poppins">Poppins</p>
       <p class="press-start">Press Start 2P</p>
 
@@ -15,7 +15,7 @@ export default component$(() => {
       <p class="bunny-aclonica">Aclonica</p>
       <p class="bunny-allan">Allan</p>
 
-      <h1>Fontshare</h1>
+      <h1>FontShare</h1>
       <p class="font-share-panchang">Panchang</p>
 
       <h1>FontSource</h1>
