@@ -1,13 +1,13 @@
-import { glob } from "tinyglobby";
-import { extname, relative } from "pathe";
-import { filename } from "pathe/utils";
-import { anyOf, createRegExp, not, wordBoundary } from "magic-regexp";
-import { defineFontProvider } from "unifont";
-import { withLeadingSlash, withTrailingSlash } from "ufo";
-import type { FontFaceData } from "../types";
-import { parseFont } from "../css/render";
+import { glob } from 'tinyglobby';
+import { extname, relative } from 'pathe';
+import { filename } from 'pathe/utils';
+import { anyOf, createRegExp, not, wordBoundary } from 'magic-regexp';
+import { defineFontProvider } from 'unifont';
+import { withLeadingSlash, withTrailingSlash } from 'ufo';
+import type { FontFaceData } from '../types';
+import { parseFont } from '../css/render';
 
-export default defineFontProvider("local", async () => {
+export default defineFontProvider('local', async () => {
   const providerContext = {
     rootPaths: [] as string[],
     registry: {} as Record<string, string[]>,
@@ -26,17 +26,17 @@ export default defineFontProvider("local", async () => {
     for (const slug of slugs) {
       providerContext.registry[slug] ||= [];
       providerContext.registry[slug] = providerContext.registry[slug]!.filter(
-        (p) => p !== path
+        (p) => p !== path,
       );
     }
   }
 
-  const extensionPriority = [".woff2", ".woff", ".ttf", ".otf", ".eot"];
+  const extensionPriority = ['.woff2', '.woff', '.ttf', '.otf', '.eot'];
   function lookupFont(
     family: string,
-    suffixes: Array<string | number>
+    suffixes: Array<string | number>,
   ): string[] {
-    const slug = [fontFamilyToSlug(family), ...suffixes].join("-");
+    const slug = [fontFamilyToSlug(family), ...suffixes].join('-');
     const paths = providerContext.registry[slug];
     if (!paths || paths.length === 0) {
       return [];
@@ -45,7 +45,7 @@ export default defineFontProvider("local", async () => {
     const fonts = new Set<string>();
     for (const path of paths) {
       const base = providerContext.rootPaths.find((root) =>
-        path.startsWith(root)
+        path.startsWith(root),
       );
       fonts.add(base ? withLeadingSlash(relative(base, path)) : path);
     }
@@ -58,8 +58,8 @@ export default defineFontProvider("local", async () => {
     });
   }
 
-  const possibleFontFiles = await glob(["**/*.{ttf,woff,woff2,eot,otf}"]);
-  providerContext.rootPaths.push(withTrailingSlash("/"));
+  const possibleFontFiles = await glob(['**/*.{ttf,woff,woff2,eot,otf}']);
+  providerContext.rootPaths.push(withTrailingSlash('/'));
 
   for (const file of possibleFontFiles) {
     registerFont(file);
@@ -67,7 +67,7 @@ export default defineFontProvider("local", async () => {
 
   // Sort rootPaths so we resolve to most specific path first
   providerContext.rootPaths = providerContext.rootPaths.sort(
-    (a, b) => b.length - a.length
+    (a, b) => b.length - a.length,
   );
 
   return {
@@ -111,78 +111,78 @@ export const isFontFile = (id: string) => FONT_RE.test(id);
 // TODO: support without hyphen
 // TODO: support reading font metrics
 const weightMap: Record<string, string> = {
-  100: "thin",
-  200: "extra-light",
-  300: "light",
-  400: "normal",
-  500: "medium",
-  600: "semi-bold",
-  700: "bold",
-  800: "extra-bold",
-  900: "black",
+  100: 'thin',
+  200: 'extra-light',
+  300: 'light',
+  400: 'normal',
+  500: 'medium',
+  600: 'semi-bold',
+  700: 'bold',
+  800: 'extra-bold',
+  900: 'black',
 };
 
 const weights = Object.entries(weightMap)
-  .flatMap((e) => e)
-  .filter((r) => r !== "normal");
+  .flat()
+  .filter((r) => r !== 'normal');
 const WEIGHT_RE = createRegExp(
-  anyOf(...new Set([...weights, ...weights.map((w) => w.replace("-", ""))]))
-    .groupedAs("weight")
+  anyOf(...new Set([...weights, ...weights.map((w) => w.replace('-', ''))]))
+    .groupedAs('weight')
     .after(not.digit)
     .before(not.digit.or(wordBoundary)),
-  ["i"]
+  ['i'],
 );
 
-const styles = ["italic", "oblique"] as const;
+const styles = ['italic', 'oblique'] as const;
 const STYLE_RE = createRegExp(
   anyOf(...styles)
-    .groupedAs("style")
+    .groupedAs('style')
     .before(not.wordChar.or(wordBoundary)),
-  ["i"]
+  ['i'],
 );
 
 const subsets = [
-  "cyrillic-ext",
-  "cyrillic",
-  "greek-ext",
-  "greek",
-  "vietnamese",
-  "latin-ext",
-  "latin",
+  'cyrillic-ext',
+  'cyrillic',
+  'greek-ext',
+  'greek',
+  'vietnamese',
+  'latin-ext',
+  'latin',
 ] as const;
 const SUBSET_RE = createRegExp(
   anyOf(...subsets)
-    .groupedAs("subset")
+    .groupedAs('subset')
     .before(not.wordChar.or(wordBoundary)),
-  ["i"]
+  ['i'],
 );
 
 function generateSlugs(path: string) {
   let name = filename(path);
 
-  const weight = name.match(WEIGHT_RE)?.groups?.weight || "normal";
-  const style = name.match(STYLE_RE)?.groups?.style || "normal";
-  const subset = name.match(SUBSET_RE)?.groups?.subset || "latin";
+  const weight = name.match(WEIGHT_RE)?.groups?.weight || 'normal';
+  const style = name.match(STYLE_RE)?.groups?.style || 'normal';
+  const subset = name.match(SUBSET_RE)?.groups?.subset || 'latin';
 
   for (const slug of [weight, style, subset]) {
-    name = name.replace(slug, "");
+    name = name.replace(slug, '');
   }
 
   const slugs = new Set<string>();
 
   for (const slug of [
-    name.replace(/\.\w*$/, ""),
-    name.replace(/[._-]\w*$/, ""),
+    name.replace(/\.\w*$/, ''),
+    name.replace(/[._-]\w*$/, ''),
   ]) {
     slugs.add(
       [
-        fontFamilyToSlug(slug.replace(/[\W_]+$/, "")),
+        fontFamilyToSlug(slug.replace(/[\W_]+$/, '')),
         weightMap[weight] || weight,
         style,
         subset,
       ]
-        .join("-")
-        .toLowerCase()
+        .join('-')
+        .toLowerCase(),
     );
   }
 
@@ -190,5 +190,5 @@ function generateSlugs(path: string) {
 }
 
 function fontFamilyToSlug(family: string) {
-  return family.toLowerCase().replace(NON_WORD_RE, "");
+  return family.toLowerCase().replace(NON_WORD_RE, '');
 }
