@@ -1,13 +1,13 @@
-import { component$ } from "@qwik.dev/core";
-import { isDev } from "@qwik.dev/core/build";
+import { component$ } from '@qwik.dev/core';
+import { isDev } from '@qwik.dev/core/build';
 import {
   QwikRouterProvider,
   RouterOutlet,
   ServiceWorkerRegister,
-} from "@qwik.dev/router";
-import { RouterHead } from "./components/router-head/router-head";
+} from '@qwik.dev/router';
+import { RouterHead } from './components/router-head/router-head';
 
-import "./global.css";
+import './global.css';
 
 export default component$(() => {
   /**
