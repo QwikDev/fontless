@@ -10,9 +10,9 @@
     "vue-demo.dev": "pnpm --filter fontless-demo-vue-app dev",
     "demo.dev": "pnpm --filter fontless-demo-* dev",
     "lint": "biome lint . --write",
-    "lint:check": "biome lint .",
+    "lint.check": "biome lint .",
     "fmt": "biome format . --write",
-    "fmt:check": "biome format ."
+    "fmt.check": "biome format ."
   },
   "keywords": [],
   "author": "",
