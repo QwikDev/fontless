@@ -5,9 +5,29 @@ import type {
   providers,
   RemoteFontSource,
   ResolveFontOptions,
-} from 'unifont';
+} from "unifont";
 
-import type { GenericCSSFamily } from './css/parse';
+import type { GenericCSSFamily } from "./css/parse";
+
+export interface FontProvider<FontProviderOptions = Record<string, unknown>> {
+  /**
+   * Resolve data for `@font-face` declarations.
+   *
+   * If nothing is returned then this provider doesn't handle the font family and we
+   * will continue calling `resolveFontFaces` in other providers.
+   */
+  resolveFontFaces?: (
+    fontFamily: string,
+    options: ResolveFontOptions
+  ) => Awaitable<void | {
+    /**
+     * Return data used to generate @font-face declarations.
+     * @see https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face
+     */
+    fonts: FontFaceData[];
+    fallbacks?: string[];
+  }>;
+}
 
 export type Awaitable<T> = T | Promise<T>;
 
@@ -17,7 +37,7 @@ export interface FontFaceData {
    * The font-display descriptor.
    * @default 'swap'
    */
-  display?: 'auto' | 'block' | 'swap' | 'fallback' | 'optional';
+  display?: "auto" | "block" | "swap" | "fallback" | "optional";
   /** A font-weight value. */
   weight?: string | number | [number, number];
   /** A font-stretch value. */
@@ -43,13 +63,23 @@ export interface FontFaceResolution {
 }
 
 export interface FontlessOptions {
+  baseURL: string;
+  buildDir: string;
   dev: boolean;
   processCSSVariables?: boolean;
   shouldPreload: (fontFamily: string, font: FontFaceData) => boolean;
   fontsToPreload: Map<string, Set<string>>;
 }
 
+export interface ModuleHooks {
+  "rollup:before"?: (options: Options) => Awaitable<void>;
+  "fonts:providers"?: (
+    providers: Record<string, ProviderFactory | FontProvider>
+  ) => void | Promise<void>;
+}
+
 export interface Options {
+  hooks: ModuleHooks;
   module: ModuleOptions;
   fontless: FontlessOptions;
 }
@@ -62,7 +92,7 @@ export interface Options {
 //   sizeAdjust?: string // size-adjust
 // }
 
-export type FontProviderName = (string & {}) | 'google' | 'local' | 'none';
+export type FontProviderName = (string & {}) | "google" | "local" | "none";
 
 export interface FontFamilyOverrides {
   /** The font family to apply this override to. */
@@ -81,7 +111,7 @@ export interface FontFamilyOverrides {
 export interface FontFamilyProviderOverride
   extends FontFamilyOverrides,
     Partial<
-      Omit<ResolveFontOptions, 'weights'> & { weights: Array<string | number> }
+      Omit<ResolveFontOptions, "weights"> & { weights: Array<string | number> }
     > {
   /** The provider to use when resolving this font. */
   provider?: FontProviderName;
@@ -90,7 +120,7 @@ export interface FontFamilyProviderOverride
 export type FontSource = string | LocalFontSource | RemoteFontSource;
 
 export interface RawFontFaceData
-  extends Omit<FontFaceData, 'src' | 'unicodeRange'> {
+  extends Omit<FontFaceData, "src" | "unicodeRange"> {
   src: FontSource | Array<FontSource>;
   unicodeRange?: string | string[];
 }
@@ -126,8 +156,8 @@ export interface ModuleOptions {
   defaults?: Partial<{
     preload: boolean;
     weights: Array<string | number>;
-    styles: ResolveFontOptions['styles'];
-    subsets: ResolveFontOptions['subsets'];
+    styles: ResolveFontOptions["styles"];
+    subsets: ResolveFontOptions["subsets"];
     fallbacks?: Partial<Record<GenericCSSFamily, string[]>>;
   }>;
   providers?: {
@@ -147,7 +177,7 @@ export interface ModuleOptions {
      */
     prefix?: string;
     /** Currently font assets are exposed as public assets as part of the build. This will be configurable in future */
-    strategy?: 'public';
+    strategy?: "public";
   };
   /** Options passed directly to `local` font provider (none currently) */
   local?: Record<string, never>;
@@ -205,10 +235,4 @@ export interface ModuleOptions {
      */
     processCSSVariables?: boolean;
   };
-}
-
-export interface ModuleHooks {
-  'fonts:providers': (
-    providers: Record<string, ProviderFactory | FontProvider>,
-  ) => void | Promise<void>;
 }

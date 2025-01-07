@@ -1,10 +1,9 @@
-import type { ESBuildOptions, Plugin } from 'vite';
-import type { FontlessOptions, Options } from '../types';
-import type { transform } from 'esbuild';
-import type { TransformOptions } from 'esbuild';
-import { transformCSS } from '../css/transformer';
-import { providers } from 'unifont';
-import local from '../providers/local';
+import type { transform, TransformOptions } from "esbuild";
+import { providers } from "unifont";
+import type { ESBuildOptions, Plugin } from "vite";
+import { transformCSS } from "../css/transformer";
+import local from "../providers/local";
+import type { FontlessOptions, Options } from "../types";
 
 const defaultModule = {
   devtools: true,
@@ -14,12 +13,12 @@ const defaultModule = {
   },
   defaults: {},
   assets: {
-    prefix: '/_fonts',
+    prefix: "/_fonts",
   },
   local: {},
   google: {},
   adobe: {
-    id: '',
+    id: "",
   },
   providers: {
     // should import with Jiti
@@ -34,22 +33,25 @@ const defaultModule = {
 };
 
 const defaultFontless: FontlessOptions = {
-  dev: false,
+  baseURL: "public",
+  buildDir: "dist",
+  dev: process.env.NODE_ENV !== "production",
   processCSSVariables: false,
   shouldPreload: () => false,
   fontsToPreload: new Map(),
 };
 
-const defaultOptions = {
+const defaultOptions: Options = {
+  hooks: {},
   module: defaultModule,
   fontless: defaultFontless,
 };
 
 function resolveMinifyCssEsbuildOptions(
-  options: ESBuildOptions,
+  options: ESBuildOptions
 ): TransformOptions {
   const base: TransformOptions = {
-    charset: options.charset ?? 'utf8',
+    charset: options.charset ?? "utf8",
     logLevel: options.logLevel,
     logLimit: options.logLimit,
     logOverride: options.logOverride,
@@ -77,14 +79,14 @@ export const fontless = (options: Options = defaultOptions): Plugin => {
   let postcssOptions: Parameters<typeof transform>[1] | undefined;
 
   return {
-    name: 'vite-plugin-fontless',
+    name: "vite-plugin-fontless",
     configResolved(config) {
       if (fontless.dev || !config.esbuild || postcssOptions) {
         return;
       }
 
       postcssOptions = {
-        target: config.esbuild.target ?? 'chrome',
+        target: config.esbuild.target ?? "chrome",
         ...resolveMinifyCssEsbuildOptions(config.esbuild),
       };
     },
@@ -94,7 +96,7 @@ export const fontless = (options: Options = defaultOptions): Plugin => {
           if (fontless.fontsToPreload.has(file)) {
             fontless.fontsToPreload.set(
               chunk.facadeModuleId,
-              fontless.fontsToPreload.get(file)!,
+              fontless.fontsToPreload.get(file)!
             );
           }
         }
@@ -102,11 +104,13 @@ export const fontless = (options: Options = defaultOptions): Plugin => {
     },
     async transform(code, id) {
       // Early return if no font-family is used in this CSS
-      if (!fontless.processCSSVariables && !code.includes('font-family:')) {
+      if (!fontless.processCSSVariables && !code.includes("font-family:")) {
         return;
       }
 
       const s = await transformCSS(options, code, id, postcssOptions);
+
+      options.hooks["rollup:before"]?.(options);
 
       if (s.hasChanged()) {
         return {
