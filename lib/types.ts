@@ -64,7 +64,6 @@ export interface FontFaceResolution {
 
 export interface FontlessOptions {
   baseURL: string;
-  buildDir: string;
   dev: boolean;
   processCSSVariables?: boolean;
   shouldPreload: (fontFamily: string, font: FontFaceData) => boolean;

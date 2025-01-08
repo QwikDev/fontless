@@ -57,18 +57,7 @@ export async function setupPublicAssetStrategy(options: Options) {
     return data;
   }
 
-  const cacheDir = join(options.fontless.buildDir, "cache", "fonts");
-
-  if (!options.fontless.dev) {
-    await fsp.mkdir(cacheDir, { recursive: true });
-  }
-
   const rollupBefore = async () => {
-    if (options.fontless.dev) {
-      await fsp.mkdir(join(options.fontless.baseURL, assetsBaseURL), {
-        recursive: true,
-      });
-    }
     for (const [filename, url] of renderedFontURLs) {
       const key = "data:fonts:" + filename;
       // Use storage to cache the font data between builds
@@ -81,14 +70,15 @@ export async function setupPublicAssetStrategy(options: Options) {
         await storage.setItemRaw(key, res);
       }
 
-      await fsp.writeFile(join(cacheDir, filename), res);
+      // TODO: investigate how we can improve in dev surround
+      await fsp.mkdir(join(options.fontless.baseURL, assetsBaseURL), {
+        recursive: true,
+      });
 
-      if (options.fontless.dev) {
-        await fsp.writeFile(
-          joinRelativeURL(options.fontless.baseURL, assetsBaseURL, filename),
-          res
-        );
-      }
+      await fsp.writeFile(
+        joinRelativeURL(options.fontless.baseURL, assetsBaseURL, filename),
+        res
+      );
     }
   };
 

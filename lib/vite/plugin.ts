@@ -34,7 +34,6 @@ const defaultModule = {
 
 const defaultFontless: FontlessOptions = {
   baseURL: "public",
-  buildDir: "dist",
   dev: process.env.NODE_ENV !== "production",
   processCSSVariables: false,
   shouldPreload: () => false,
@@ -110,6 +109,7 @@ export const fontless = (options: Options = defaultOptions): Plugin => {
 
       const s = await transformCSS(options, code, id, postcssOptions);
 
+      //TODO: Move this to a hook from vite
       options.hooks["rollup:before"]?.(options);
 
       if (s.hasChanged()) {

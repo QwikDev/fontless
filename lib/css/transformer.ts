@@ -224,7 +224,7 @@ export async function transformCSS(
   opts: { relative?: boolean } = {}
 ) {
   const { fontless } = options;
-  const s = new MagicString(code);
+  const string = new MagicString(code);
 
   const injectedDeclarations = new Set<string>();
 
@@ -313,11 +313,11 @@ export async function transformCSS(
       }
     }
 
-    s.prepend(prefaces.join(""));
+    string.prepend(prefaces.join(""));
 
     if (fallbackOptions && insertFontFamilies) {
       const insertedFamilies = fallbackMap.map((f) => `"${f.name}"`).join(", ");
-      s.prependLeft(fallbackOptions.index, `, ${insertedFamilies}`);
+      string.prependLeft(fallbackOptions.index, `, ${insertedFamilies}`);
     }
   }
 
@@ -390,7 +390,7 @@ export async function transformCSS(
 
   await Promise.all(promises);
 
-  return s;
+  return string;
 }
 
 async function resolveProviders(_providers: ModuleOptions["providers"] = {}) {
@@ -409,5 +409,6 @@ async function resolveProviders(_providers: ModuleOptions["providers"] = {}) {
       });
     }
   }
+
   return providers as Record<string, (options: any) => Provider>;
 }
