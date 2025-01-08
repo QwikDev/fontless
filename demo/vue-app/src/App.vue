@@ -50,7 +50,7 @@ p {
 
 @font-face {
   font-family: "Black Fox";
-  src: url("../src/assets/fonts/black-fox.ttf");
+  src: url("./black-fox.ttf");
 }
 
 .local {
