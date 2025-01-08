@@ -3,8 +3,8 @@ import './style.css';
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div>
       <h1>Google</h1>
-      <p class="poppins">Poppins</p>
-      <p class="press-start">Press Start 2P</p>
+      <p class="google-poppins">Poppins</p>
+      <p class="google-press-start">Press Start 2P</p>
 
       <h1>Bunny</h1>
       <p class="bunny-aclonica">Aclonica</p>

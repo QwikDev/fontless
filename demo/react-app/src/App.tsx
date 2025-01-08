@@ -4,8 +4,8 @@ function App() {
   return (
     <div>
       <h1>Google</h1>
-      <p className="poppins">Poppins</p>
-      <p className="press-start">Press Start 2P</p>
+      <p className="google-poppins">Poppins</p>
+      <p className="google-press-start">Press Start 2P</p>
 
       <h1>Bunny</h1>
       <p className="bunny-aclonica">Aclonica</p>
