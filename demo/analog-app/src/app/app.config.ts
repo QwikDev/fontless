@@ -3,7 +3,10 @@ import {
   withFetch,
   withInterceptors,
 } from '@angular/common/http';
-import { type ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {
+  type ApplicationConfig,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideFileRouter, requestContextInterceptor } from '@analogjs/router';
 
