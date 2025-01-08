@@ -9,6 +9,26 @@ import type {
 
 import type { GenericCSSFamily } from './css/parse';
 
+export interface FontProvider {
+  /**
+   * Resolve data for `@font-face` declarations.
+   *
+   * If nothing is returned then this provider doesn't handle the font family and we
+   * will continue calling `resolveFontFaces` in other providers.
+   */
+  resolveFontFaces?: (
+    fontFamily: string,
+    options: ResolveFontOptions,
+  ) => Awaitable<{
+    /**
+     * Return data used to generate @font-face declarations.
+     * @see https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face
+     */
+    fonts: FontFaceData[];
+    fallbacks?: string[];
+  }>;
+}
+
 export type Awaitable<T> = T | Promise<T>;
 
 export interface FontFaceData {
@@ -43,13 +63,22 @@ export interface FontFaceResolution {
 }
 
 export interface FontlessOptions {
+  baseURL: string;
   dev: boolean;
   processCSSVariables?: boolean;
   shouldPreload: (fontFamily: string, font: FontFaceData) => boolean;
   fontsToPreload: Map<string, Set<string>>;
 }
 
+export interface ModuleHooks {
+  'rollup:before'?: (options: Options) => Awaitable<void>;
+  'fonts:providers'?: (
+    providers: Record<string, ProviderFactory | FontProvider>,
+  ) => void | Promise<void>;
+}
+
 export interface Options {
+  hooks: ModuleHooks;
   module: ModuleOptions;
   fontless: FontlessOptions;
 }
@@ -205,10 +234,4 @@ export interface ModuleOptions {
      */
     processCSSVariables?: boolean;
   };
-}
-
-export interface ModuleHooks {
-  'fonts:providers': (
-    providers: Record<string, ProviderFactory | FontProvider>,
-  ) => void | Promise<void>;
 }

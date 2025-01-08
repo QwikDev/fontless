@@ -1,39 +1,36 @@
+import type { CssNode, StyleSheet } from 'css-tree';
+import { parse, walk } from 'css-tree';
 import { transform } from 'esbuild';
 import { createJiti } from 'jiti';
 import MagicString from 'magic-string';
-import { parse, walk } from 'css-tree';
-import { dirname, extname } from 'pathe';
-import { hasProtocol, withLeadingSlash } from 'ufo';
+import { dirname } from 'pathe';
+import { withLeadingSlash } from 'ufo';
 import {
   createUnifont,
   type FontFaceData,
   type Provider,
   type RemoteFontSource,
 } from 'unifont';
-import {
-  type GenericCSSFamily,
-  extractFontFamilies,
-  extractGeneric,
-  extractEndOfFirstChild,
-  addLocalFallbacks,
-} from './parse';
-import {
-  formatToExtension,
-  generateFontFace,
-  generateFontFallbacks,
-  parseFont,
-  relativiseFontSources,
-} from './render';
-import { hash } from 'ohash';
-import { filename } from 'pathe/utils';
 import type {
-  ModuleOptions,
-  RawFontFaceData,
+  FontFaceResolution,
   FontFamilyManualOverride,
   FontFamilyProviderOverride,
+  ModuleOptions,
   Options,
-  FontFaceResolution,
 } from '../types';
+import { setupPublicAssetStrategy } from './assets';
+import {
+  addLocalFallbacks,
+  extractEndOfFirstChild,
+  extractFontFamilies,
+  extractGeneric,
+  type GenericCSSFamily,
+} from './parse';
+import {
+  generateFontFace,
+  generateFontFallbacks,
+  relativiseFontSources,
+} from './render';
 
 const defaultValues = {
   weights: [400],
@@ -76,6 +73,9 @@ async function defaultResolveFontFace(
   fallbackOptions,
 ) {
   const { module } = options;
+
+  const { normalizeFontData } = await setupPublicAssetStrategy(options);
+
   const override = module.families?.find((f) => f.name === fontFamily);
 
   // This CSS will be injected in a separate location
@@ -88,46 +88,6 @@ async function defaultResolveFontFace(
       return font;
     }
     return addLocalFallbacks(fontFamily, font);
-  }
-
-  function normalizeFontData(
-    faces: RawFontFaceData | FontFaceData[],
-  ): FontFaceData[] {
-    // const assetsBaseURL = module.assets.prefix || "/fonts"; //TODO: Review this if it's necessary?
-    // const renderedFontURLs = new Map<string, string>(); //TODO: Review this if it's necessary?
-    const data: FontFaceData[] = [];
-    for (const face of Array.isArray(faces) ? faces : [faces]) {
-      data.push({
-        ...face,
-        unicodeRange:
-          face.unicodeRange === undefined || Array.isArray(face.unicodeRange)
-            ? face.unicodeRange
-            : [face.unicodeRange],
-        src: (Array.isArray(face.src) ? face.src : [face.src]).map((src) => {
-          const source = typeof src === 'string' ? parseFont(src) : src;
-          if (
-            'url' in source &&
-            hasProtocol(source.url, { acceptRelative: true })
-          ) {
-            source.url = source.url.replace(/^\/\//, 'https://');
-            const file = [
-              // TODO: investigate why negative ignore pattern below is being ignored
-              filename(source.url.replace(/\?.*/, '')).replace(/^-+/, ''),
-              hash(source) +
-                (extname(source.url) || formatToExtension(source.format) || ''),
-            ]
-              .filter(Boolean)
-              .join('-');
-
-            // renderedFontURLs.set(file, source.url); //TODO: Review this if it's necessary?
-            source.originalURL = source.url;
-            // source.url = joinURL(assetsBaseURL, file); //TODO: Review this if it's necessary?
-          }
-          return source;
-        }),
-      });
-    }
-    return data;
   }
 
   async function resolveFontFaceWithOverride(
@@ -155,19 +115,16 @@ async function defaultResolveFontFace(
       normalizedDefaults.fallbacks[fallbackOptions?.generic || 'sans-serif'];
 
     if (override && 'src' in override) {
-      const fonts = addFallbacks(
-        fontFamily,
-        normalizeFontData({
-          src: override.src,
-          display: override.display,
-          weight: override.weight,
-          style: override.style,
-        }),
-      );
+      const fonts = normalizeFontData({
+        src: override.src,
+        display: override.display,
+        weight: override.weight,
+        style: override.style,
+      });
 
       return {
         fallbacks,
-        fonts,
+        fonts: addFallbacks(fontFamily, fonts),
       };
     }
 
@@ -267,7 +224,7 @@ export async function transformCSS(
   opts: { relative?: boolean } = {},
 ) {
   const { fontless } = options;
-  const s = new MagicString(code);
+  const string = new MagicString(code);
 
   const injectedDeclarations = new Set<string>();
 
@@ -356,11 +313,11 @@ export async function transformCSS(
       }
     }
 
-    s.prepend(prefaces.join(''));
+    string.prepend(prefaces.join(''));
 
     if (fallbackOptions && insertFontFamilies) {
       const insertedFamilies = fallbackMap.map((f) => `"${f.name}"`).join(', ');
-      s.prependLeft(fallbackOptions.index, `, ${insertedFamilies}`);
+      string.prependLeft(fallbackOptions.index, `, ${insertedFamilies}`);
     }
   }
 
@@ -433,7 +390,7 @@ export async function transformCSS(
 
   await Promise.all(promises);
 
-  return s;
+  return string;
 }
 
 async function resolveProviders(_providers: ModuleOptions['providers'] = {}) {
@@ -452,5 +409,6 @@ async function resolveProviders(_providers: ModuleOptions['providers'] = {}) {
       });
     }
   }
+
   return providers as Record<string, (options: any) => Provider>;
 }

@@ -1,10 +1,9 @@
-import type { ESBuildOptions, Plugin } from 'vite';
-import type { FontlessOptions, Options } from '../types';
-import type { transform } from 'esbuild';
-import type { TransformOptions } from 'esbuild';
-import { transformCSS } from '../css/transformer';
+import type { transform, TransformOptions } from 'esbuild';
 import { providers } from 'unifont';
+import type { ESBuildOptions, Plugin } from 'vite';
+import { transformCSS } from '../css/transformer';
 import local from '../providers/local';
+import type { FontlessOptions, Options } from '../types';
 
 const defaultModule = {
   devtools: true,
@@ -34,13 +33,15 @@ const defaultModule = {
 };
 
 const defaultFontless: FontlessOptions = {
-  dev: false,
+  baseURL: 'public',
+  dev: process.env.NODE_ENV !== 'production',
   processCSSVariables: false,
   shouldPreload: () => false,
   fontsToPreload: new Map(),
 };
 
-const defaultOptions = {
+const defaultOptions: Options = {
+  hooks: {},
   module: defaultModule,
   fontless: defaultFontless,
 };
@@ -107,6 +108,9 @@ export const fontless = (options: Options = defaultOptions): Plugin => {
       }
 
       const s = await transformCSS(options, code, id, postcssOptions);
+
+      //TODO: Move this to a hook from vite
+      options.hooks['rollup:before']?.(options);
 
       if (s.hasChanged()) {
         return {
