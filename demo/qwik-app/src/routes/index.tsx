@@ -1,5 +1,5 @@
-import type { DocumentHead } from '@qwik.dev/router';
 import { component$, useStyles$ } from '@qwik.dev/core';
+import type { DocumentHead } from '@qwik.dev/router';
 import styles from './index.css?inline';
 
 export default component$(() => {
@@ -8,8 +8,8 @@ export default component$(() => {
   return (
     <div>
       <h1>Google</h1>
-      <p class="poppins">Poppins</p>
-      <p class="press-start">Press Start 2P</p>
+      <p class="google-poppins">Poppins</p>
+      <p class="google-press-start">Press Start 2P</p>
 
       <h1>Bunny</h1>
       <p class="bunny-aclonica">Aclonica</p>
