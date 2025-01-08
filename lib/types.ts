@@ -9,7 +9,7 @@ import type {
 
 import type { GenericCSSFamily } from './css/parse';
 
-export interface FontProvider<FontProviderOptions = Record<string, unknown>> {
+export interface FontProvider {
   /**
    * Resolve data for `@font-face` declarations.
    *
@@ -19,7 +19,7 @@ export interface FontProvider<FontProviderOptions = Record<string, unknown>> {
   resolveFontFaces?: (
     fontFamily: string,
     options: ResolveFontOptions,
-  ) => Awaitable<void | {
+  ) => Awaitable<{
     /**
      * Return data used to generate @font-face declarations.
      * @see https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face
