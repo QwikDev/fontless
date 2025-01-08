@@ -1,76 +1,76 @@
-import type { CssNode, StyleSheet } from "css-tree";
-import { parse, walk } from "css-tree";
-import { transform } from "esbuild";
-import { createJiti } from "jiti";
-import MagicString from "magic-string";
-import { dirname } from "pathe";
-import { withLeadingSlash } from "ufo";
+import type { CssNode, StyleSheet } from 'css-tree';
+import { parse, walk } from 'css-tree';
+import { transform } from 'esbuild';
+import { createJiti } from 'jiti';
+import MagicString from 'magic-string';
+import { dirname } from 'pathe';
+import { withLeadingSlash } from 'ufo';
 import {
   createUnifont,
   type FontFaceData,
   type Provider,
   type RemoteFontSource,
-} from "unifont";
+} from 'unifont';
 import type {
   FontFaceResolution,
   FontFamilyManualOverride,
   FontFamilyProviderOverride,
   ModuleOptions,
   Options,
-} from "../types";
-import { setupPublicAssetStrategy } from "./assets";
+} from '../types';
+import { setupPublicAssetStrategy } from './assets';
 import {
   addLocalFallbacks,
   extractEndOfFirstChild,
   extractFontFamilies,
   extractGeneric,
   type GenericCSSFamily,
-} from "./parse";
+} from './parse';
 import {
   generateFontFace,
   generateFontFallbacks,
   relativiseFontSources,
-} from "./render";
+} from './render';
 
 const defaultValues = {
   weights: [400],
-  styles: ["normal", "italic"] as const,
+  styles: ['normal', 'italic'] as const,
   subsets: [
-    "cyrillic-ext",
-    "cyrillic",
-    "greek-ext",
-    "greek",
-    "vietnamese",
-    "latin-ext",
-    "latin",
+    'cyrillic-ext',
+    'cyrillic',
+    'greek-ext',
+    'greek',
+    'vietnamese',
+    'latin-ext',
+    'latin',
   ],
   fallbacks: {
-    serif: ["Times New Roman"],
-    "sans-serif": ["Arial"],
-    monospace: ["Courier New"],
+    serif: ['Times New Roman'],
+    'sans-serif': ['Arial'],
+    monospace: ['Courier New'],
     cursive: [],
     fantasy: [],
-    "system-ui": [
-      "BlinkMacSystemFont",
-      "Segoe UI",
-      "Roboto",
-      "Helvetica Neue",
-      "Arial",
+    'system-ui': [
+      'BlinkMacSystemFont',
+      'Segoe UI',
+      'Roboto',
+      'Helvetica Neue',
+      'Arial',
     ],
-    "ui-serif": ["Times New Roman"],
-    "ui-sans-serif": ["Arial"],
-    "ui-monospace": ["Courier New"],
-    "ui-rounded": [],
+    'ui-serif': ['Times New Roman'],
+    'ui-sans-serif': ['Arial'],
+    'ui-monospace': ['Courier New'],
+    'ui-rounded': [],
     emoji: [],
     math: [],
     fangsong: [],
   },
-} satisfies ModuleOptions["defaults"];
+} satisfies ModuleOptions['defaults'];
 
 async function defaultResolveFontFace(
   options: Options,
   fontFamily,
-  fallbackOptions
+  fallbackOptions,
 ) {
   const { module } = options;
 
@@ -93,11 +93,11 @@ async function defaultResolveFontFace(
   async function resolveFontFaceWithOverride(
     fontFamily: string,
     override?: FontFamilyManualOverride | FontFamilyProviderOverride,
-    fallbackOptions?: { fallbacks: string[]; generic?: GenericCSSFamily }
+    fallbackOptions?: { fallbacks: string[]; generic?: GenericCSSFamily },
   ): Promise<FontFaceResolution | undefined> {
     const normalizedDefaults = {
       weights: (module.defaults?.weights || defaultValues.weights).map((v) =>
-        String(v)
+        String(v),
       ),
       styles: module.defaults?.styles || defaultValues.styles,
       subsets: module.defaults?.subsets || defaultValues.subsets,
@@ -107,14 +107,14 @@ async function defaultResolveFontFace(
           Array.isArray(module.defaults?.fallbacks)
             ? module.defaults.fallbacks
             : module.defaults?.fallbacks?.[key as GenericCSSFamily] || value,
-        ])
+        ]),
       ) as Record<GenericCSSFamily, string[]>,
     };
 
     const fallbacks =
-      normalizedDefaults.fallbacks[fallbackOptions?.generic || "sans-serif"];
+      normalizedDefaults.fallbacks[fallbackOptions?.generic || 'sans-serif'];
 
-    if (override && "src" in override) {
+    if (override && 'src' in override) {
       const fonts = normalizeFontData({
         src: override.src,
         display: override.display,
@@ -129,15 +129,15 @@ async function defaultResolveFontFace(
     }
 
     // Respect fonts that should not be resolved through `@nuxt/fonts`
-    if (override?.provider === "none") {
+    if (override?.provider === 'none') {
       return;
     }
 
     // Respect custom weights, styles and subsets options
     const defaults = { ...normalizedDefaults, fallbacks };
-    for (const key of ["weights", "styles", "subsets"] as const) {
+    for (const key of ['weights', 'styles', 'subsets'] as const) {
       if (override?.[key]) {
-        defaults[key as "weights"] = override[key]!.map((v) => String(v));
+        defaults[key as 'weights'] = override[key]!.map((v) => String(v));
       }
     }
 
@@ -154,7 +154,7 @@ async function defaultResolveFontFace(
       } else {
         //TODO: Fix this type
         const providerOptions: any =
-          module[key as "google" | "local" | "adobe"] ?? {};
+          module[key as 'google' | 'local' | 'adobe'] ?? {};
         resolvedProviders.push(provider(providerOptions));
       }
     }
@@ -178,7 +178,7 @@ async function defaultResolveFontFace(
         const fonts = normalizeFontData(result?.fonts || []);
         if (!fonts.length || !result) {
           console.warn(
-            `Could not produce font face declaration from \`${override.provider}\` for font family \`${fontFamily}\`.`
+            `Could not produce font face declaration from \`${override.provider}\` for font family \`${fontFamily}\`.`,
           );
           return;
         }
@@ -207,7 +207,7 @@ async function defaultResolveFontFace(
       }
       if (override) {
         console.warn(
-          `Could not produce font face declaration for \`${fontFamily}\` with override.`
+          `Could not produce font face declaration for \`${fontFamily}\` with override.`,
         );
       }
     }
@@ -221,7 +221,7 @@ export async function transformCSS(
   code: string,
   id: string,
   postcssOptions: Parameters<typeof transform>[1],
-  opts: { relative?: boolean } = {}
+  opts: { relative?: boolean } = {},
 ) {
   const { fontless } = options;
   const string = new MagicString(code);
@@ -241,7 +241,7 @@ export async function transformCSS(
       generic?: GenericCSSFamily;
       fallbacks: string[];
       index: number;
-    }
+    },
   ) {
     const resolved = await defaultResolveFontFace(options, fontFamily, {
       generic: fallbackOptions?.generic,
@@ -263,7 +263,7 @@ export async function transformCSS(
       fontless.shouldPreload(fontFamily, result.fonts[0])
     ) {
       const fontToPreload = result.fonts[0].src.find(
-        (s): s is RemoteFontSource => "url" in s
+        (s): s is RemoteFontSource => 'url' in s,
       )?.url;
       if (fontToPreload) {
         const urls = fontless.fontsToPreload.get(id) || new Set();
@@ -277,14 +277,14 @@ export async function transformCSS(
       const fallbackDeclarations = await generateFontFallbacks(
         fontFamily,
         font,
-        fallbackMap
+        fallbackMap,
       );
       const declarations = [
         generateFontFace(
           fontFamily,
           opts.relative
             ? relativiseFontSources(font, withLeadingSlash(dirname(id)))
-            : font
+            : font,
         ),
         ...fallbackDeclarations,
       ];
@@ -294,14 +294,14 @@ export async function transformCSS(
           injectedDeclarations.add(declaration);
           if (!fontless.dev) {
             declaration = await transform(declaration, {
-              charset: "utf8",
+              charset: 'utf8',
               minify: true,
               ...postcssOptions,
             })
               .then((r) => r.code || declaration)
               .catch(() => declaration);
           } else {
-            declaration += "\n";
+            declaration += '\n';
           }
           prefaces.push(declaration);
         }
@@ -313,10 +313,10 @@ export async function transformCSS(
       }
     }
 
-    string.prepend(prefaces.join(""));
+    string.prepend(prefaces.join(''));
 
     if (fallbackOptions && insertFontFamilies) {
-      const insertedFamilies = fallbackMap.map((f) => `"${f.name}"`).join(", ");
+      const insertedFamilies = fallbackMap.map((f) => `"${f.name}"`).join(', ');
       string.prependLeft(fallbackOptions.index, `, ${insertedFamilies}`);
     }
   }
@@ -324,11 +324,11 @@ export async function transformCSS(
   // For nested CSS we need to keep track how long the parent selector is
   function processNode(node: CssNode, parentOffset = 0) {
     walk(node, {
-      visit: "Declaration",
+      visit: 'Declaration',
       enter(node) {
         if (
-          this.atrule?.name === "font-face" &&
-          node.property === "font-family"
+          this.atrule?.name === 'font-face' &&
+          node.property === 'font-family'
         ) {
           for (const family of extractFontFamilies(node)) {
             existingFontFamilies.add(family);
@@ -338,14 +338,14 @@ export async function transformCSS(
     });
 
     walk(node, {
-      visit: "Declaration",
+      visit: 'Declaration',
       enter(node) {
         if (
-          (node.property !== "font-family" &&
-            node.property !== "font" &&
+          (node.property !== 'font-family' &&
+            node.property !== 'font' &&
             (!fontless.processCSSVariables ||
-              !node.property.startsWith("--"))) ||
-          this.atrule?.name === "font-face"
+              !node.property.startsWith('--'))) ||
+          this.atrule?.name === 'font-face'
         ) {
           return;
         }
@@ -356,14 +356,14 @@ export async function transformCSS(
           promises.push(
             addFontFaceDeclaration(
               fontFamily,
-              node.value.type !== "Raw"
+              node.value.type !== 'Raw'
                 ? {
                     fallbacks,
                     generic: extractGeneric(node),
                     index: extractEndOfFirstChild(node)! + parentOffset,
                   }
-                : undefined
-            )
+                : undefined,
+            ),
           );
         }
       },
@@ -371,13 +371,13 @@ export async function transformCSS(
 
     // Process nested CSS until `css-tree` supports it: https://github.com/csstree/csstree/issues/268#issuecomment-2417963908
     walk(node, {
-      visit: "Raw",
+      visit: 'Raw',
       enter(node) {
         const nestedRaw = parse(node.value, {
           positions: true,
         }) as StyleSheet;
         const isNestedCss = nestedRaw.children.some(
-          (child) => child.type === "Rule"
+          (child) => child.type === 'Rule',
         );
         if (!isNestedCss) return;
         parentOffset += node.loc!.start.offset;
@@ -393,8 +393,8 @@ export async function transformCSS(
   return string;
 }
 
-async function resolveProviders(_providers: ModuleOptions["providers"] = {}) {
-  const jiti = createJiti("/");
+async function resolveProviders(_providers: ModuleOptions['providers'] = {}) {
+  const jiti = createJiti('/');
 
   const providers = { ..._providers };
   for (const key in providers) {
@@ -403,7 +403,7 @@ async function resolveProviders(_providers: ModuleOptions["providers"] = {}) {
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete providers[key];
     }
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       providers[key] = await jiti.import(value, {
         default: true,
       });

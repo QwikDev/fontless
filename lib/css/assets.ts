@@ -1,22 +1,22 @@
-import fsp from "node:fs/promises";
-import { hash } from "ohash";
-import { extname, join } from "pathe";
-import { filename } from "pathe/utils";
-import { hasProtocol, joinRelativeURL, joinURL } from "ufo";
-import type { FontFaceData } from "unifont";
-import { storage } from "../cache";
-import type { Options, RawFontFaceData } from "../types";
-import { formatToExtension, parseFont } from "./render";
+import fsp from 'node:fs/promises';
+import { hash } from 'ohash';
+import { extname, join } from 'pathe';
+import { filename } from 'pathe/utils';
+import { hasProtocol, joinRelativeURL, joinURL } from 'ufo';
+import type { FontFaceData } from 'unifont';
+import { storage } from '../cache';
+import type { Options, RawFontFaceData } from '../types';
+import { formatToExtension, parseFont } from './render';
 
 const renderedFontURLs = new Map<string, string>();
 
 export async function setupPublicAssetStrategy(options: Options) {
   const { module } = options;
 
-  const assetsBaseURL = module.assets.prefix || "/fonts";
+  const assetsBaseURL = module.assets.prefix || '/fonts';
 
   function normalizeFontData(
-    faces: RawFontFaceData | FontFaceData[]
+    faces: RawFontFaceData | FontFaceData[],
   ): FontFaceData[] {
     const data: FontFaceData[] = [];
     for (const face of Array.isArray(faces) ? faces : [faces]) {
@@ -27,20 +27,20 @@ export async function setupPublicAssetStrategy(options: Options) {
             ? face.unicodeRange
             : [face.unicodeRange],
         src: (Array.isArray(face.src) ? face.src : [face.src]).map((src) => {
-          const source = typeof src === "string" ? parseFont(src) : src;
+          const source = typeof src === 'string' ? parseFont(src) : src;
           if (
-            "url" in source &&
+            'url' in source &&
             hasProtocol(source.url, { acceptRelative: true })
           ) {
-            source.url = source.url.replace(/^\/\//, "https://");
+            source.url = source.url.replace(/^\/\//, 'https://');
             const file = [
               // TODO: investigate why negative ignore pattern below is being ignored
-              filename(source.url.replace(/\?.*/, "")).replace(/^-+/, ""),
+              filename(source.url.replace(/\?.*/, '')).replace(/^-+/, ''),
               hash(source) +
-                (extname(source.url) || formatToExtension(source.format) || ""),
+                (extname(source.url) || formatToExtension(source.format) || ''),
             ]
               .filter(Boolean)
-              .join("-");
+              .join('-');
 
             renderedFontURLs.set(file, source.url);
             source.originalURL = source.url;
@@ -59,7 +59,7 @@ export async function setupPublicAssetStrategy(options: Options) {
 
   const rollupBefore = async () => {
     for (const [filename, url] of renderedFontURLs) {
-      const key = "data:fonts:" + filename;
+      const key = 'data:fonts:' + filename;
       // Use storage to cache the font data between builds
       let res = await storage.getItemRaw(key);
       if (!res) {
@@ -77,12 +77,12 @@ export async function setupPublicAssetStrategy(options: Options) {
 
       await fsp.writeFile(
         joinRelativeURL(options.fontless.baseURL, assetsBaseURL, filename),
-        res
+        res,
       );
     }
   };
 
-  options.hooks["rollup:before"] = rollupBefore;
+  options.hooks['rollup:before'] = rollupBefore;
 
   return {
     normalizeFontData,
